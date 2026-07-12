@@ -1,0 +1,16 @@
+{
+    "name": "Agnes AI 工具箱",
+    "short_name": "Agnes AI",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#0a0e1a",
+    "theme_color": "#0a0e1a",
+    "description": "Agnes AI 多模态工具：聊天、生图、图生图、视频生成",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%234a7cff'/><text x='50' y='68' text-anchor='middle' fill='white' font-size='48' font-weight='bold'>A</text></svg>",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}

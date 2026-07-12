@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0e1a">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>教程 - 如何获取 Agnes API Key</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg: #0a0e1a;
+            --card: #131729;
+            --border: #1e2740;
+            --accent: #4a7cff;
+            --accent2: #7c5cfc;
+            --text: #e0e4f0;
+            --text2: #8891a8;
+            --success: #2dd284;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* 顶部导航 */
+        .nav-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 14px;
+            background: rgba(74,124,255,0.15);
+            border: 1px solid rgba(74,124,255,0.3);
+            border-radius: 16px;
+            color: var(--accent);
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(74,124,255,0.25); }
+        .nav-bar h1 {
+            font-size: 18px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 教程内容 */
+        .intro-card {
+            background: linear-gradient(135deg, rgba(74,124,255,0.12), rgba(124,92,252,0.08));
+            border: 1px solid rgba(74,124,255,0.2);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+        .intro-card p {
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .intro-card .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .step-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
+            position: relative;
+        }
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .step-card h3 {
+            font-size: 15px;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .step-card p, .step-card li {
+            color: var(--text2);
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .step-card ul {
+            padding-left: 18px;
+            margin-top: 8px;
+        }
+        .step-card li {
+            margin-bottom: 6px;
+        }
+
+        /* 链接样式 */
+        .link-btn {
+            display: inline-block;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 10px 4px 0 0;
+            transition: opacity 0.2s;
+        }
+        .link-btn:active { opacity: 0.8; }
+
+        /* 代码块 */
+        .code-block {
+            background: #0d1020;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 10px 0;
+            font-family: "SF Mono", "Fira Code", monospace;
+            font-size: 13px;
+            color: var(--success);
+            overflow-x: auto;
+            word-break: break-all;
+        }
+
+        /* 注意事项 */
+        .warn-card {
+            background: rgba(255,90,106,0.08);
+            border: 1px solid rgba(255,90,106,0.2);
+            border-radius: 14px;
+            padding: 18px;
+            margin-top: 20px;
+        }
+        .warn-card h3 {
+            color: var(--error);
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+        .warn-card li {
+            color: var(--text2);
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 6px;
+        }
+        .warn-card ul { padding-left: 18px; }
+
+        :root { --error: #ff5a6a; }
+
+        .footer { text-align: center; color: var(--text2); font-size: 11px; margin-top: 24px; padding-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="nav-bar">
+    <a class="back-btn" href="index.html">← 返回</a>
+    <h1>获取 API Key 教程</h1>
+</div>
+
+<div class="intro-card">
+    <p>Agnes AI 提供<span class="highlight">免费</span>的多模态 API，支持文字对话、文生图、图生图、文生视频和图生视频。只需注册账号并获取 API Key，即可在本工具中使用全部功能。</p>
+</div>
+
+<div class="step-card">
+    <div class="step-num">1</div>
+    <h3>打开 Agnes AI 官网并注册账号</h3>
+    <p>点击下方按钮打开 Agnes AI 开发者平台：</p>
+    <a class="link-btn" href="https://platform.agnes-ai.com" target="_blank">打开 platform.agnes-ai.com</a>
+    <p style="margin-top:10px;">在页面上点击 <strong>Sign Up</strong>（注册）按钮，使用邮箱注册一个新账号。注册完成后登录。</p>
+    <ul>
+        <li>支持 Google 账号快捷登录</li>
+        <li>也可以用任意邮箱注册</li>
+    </ul>
+</div>
+
+<div class="step-card">
+    <div class="step-num">2</div>
+    <h3>进入 API Keys 管理页面</h3>
+    <p>登录后，在左侧菜单栏找到 <strong>API Keys</strong> 选项并点击进入。你会看到一个管理 API 密钥的界面。</p>
+    <ul>
+        <li>如果是新注册的账号，页面上会是空的，这是正常的</li>
+    </ul>
+</div>
+
+<div class="step-card">
+    <div class="step-num">3</div>
+    <h3>创建新的 API Key</h3>
+    <p>点击页面上的 <strong>Create New Key</strong>（创建新密钥）按钮。系统会弹出一个窗口，你可以：</p>
+    <ul>
+        <li>给密钥起一个名字（比如"手机工具"），方便你以后辨认</li>
+        <li>直接点确认创建</li>
+    </ul>
+    <p style="margin-top:8px;">创建成功后，会显示一串以 <strong>sk-</strong> 开头的字符串，这就是你的 API Key。</p>
+    <div class="code-block">sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
+</div>
+
+<div class="step-card">
+    <div class="step-num">4</div>
+    <h3>复制并粘贴到工具中</h3>
+    <p>点击 API Key 旁边的复制按钮，把密钥复制到剪贴板。然后回到本工具首页，在顶部的输入框中粘贴你的 API Key：</p>
+    <div class="code-block">粘贴到「粘贴你的 Agnes API Key」输入框中</div>
+    <p style="margin-top:8px;">粘贴完成后，所有功能（对话、生图、视频）就可以直接使用了。</p>
+</div>
+
+<div class="step-card">
+    <div class="step-num">5</div>
+    <h3>返回工具开始使用</h3>
+    <p>API Key 只需填写一次，之后每次打开工具会自动保存（如果你的浏览器支持）。现在你可以：</p>
+    <ul>
+        <li>💬 <strong>对话</strong> — 跟 AI 聊天、问问题</li>
+        <li>🖼️ <strong>文生图</strong> — 输入文字描述，生成图片</li>
+        <li>🎨 <strong>图生图</strong> — 上传图片 + 描述，AI 帮你改造</li>
+        <li>🎬 <strong>文生视频</strong> — 输入描述，生成 5 秒视频</li>
+        <li>📹 <strong>图生视频</strong> — 上传一张照片，让 AI 让它动起来</li>
+    </ul>
+    <a class="link-btn" href="index.html" style="margin-top:14px;">← 返回工具首页</a>
+</div>
+
+<div class="warn-card">
+    <h3>⚠️ 安全提醒</h3>
+    <ul>
+        <li>API Key 是你的个人密钥，<strong>不要分享给任何人</strong></li>
+        <li>不要把 API Key 发到公开群聊、论坛或社交媒体上</li>
+        <li>如果不小心泄露了，去平台删除旧的 Key 并重新创建一个</li>
+        <li>Agnes 目前提供免费额度，但请合理使用，不要滥用</li>
+    </ul>
+</div>
+
+<p class="footer">Agnes AI · 由 Sapiens AI 提供支持</p>
+
+</body>
+</html>
