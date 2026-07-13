@@ -143,13 +143,12 @@
     <div class="result-box" id="vidResult"></div>
 </div>
 
-<!-- 图生视频（支持多图 + 关键帧） -->
+<!-- 图生视频 -->
 <div class="panel" id="panel-img2vid">
     <h3>让图片动起来</h3>
-    <p style="color:var(--text2);font-size:13px;margin-bottom:10px;">支持上传最多5张图片，AI会生成连贯视频。多图可选关键帧模式。</p>
     <div class="file-upload" id="img2vidUpload">
-        <span>点击或拖拽上传图片（最多5张）</span>
-        <input type="file" id="vidImgFile" accept="image/*" multiple onchange="previewMultiFiles(this,'img2vidUpload')">
+        <span>点击或拖拽上传图片</span>
+        <input type="file" id="vidImgFile" accept="image/*" onchange="previewFile(this,'img2vidUpload')">
     </div>
     <textarea id="imgVidPrompt" rows="2" placeholder="描述你希望图片如何动起来（可选）"></textarea>
     <div class="param-row">
@@ -161,15 +160,6 @@
                 <option value="1:1">1:1 正方形</option>
             </select>
         </div>
-        <div class="param-item">
-            <label>生成模式</label>
-            <select id="imgVidMode">
-                <option value="normal" selected>普通动画</option>
-                <option value="keyframes">关键帧过渡</option>
-            </select>
-        </div>
-    </div>
-    <div class="param-row">
         <div class="param-item">
             <label>总帧数</label>
             <select id="imgVidFrames">
@@ -259,7 +249,7 @@
                 <li>🖼️ <strong>文生图</strong> — 输入文字描述，自定义比例、清晰度生成图片</li>
                 <li>🎨 <strong>图生图</strong> — 上传图片 + 描述，自定义比例清晰度改造</li>
                 <li>🎬 <strong>文生视频</strong> — 自定义比例、帧数、时长最高10秒生成短视频</li>
-                <li>📹 <strong>图生视频</strong> — 支持上传1~5张图片，可选关键帧模式，自定义参数生成视频</li>
+                <li>📹 <strong>图生视频</strong> — 上传照片，自定义视频参数最长10秒动起来</li>
             </ul>
             <span class="link-btn" onclick="closeTutorial()" style="margin-top:14px;cursor:pointer;">← 返回工具</span>
         </div>

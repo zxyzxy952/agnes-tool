@@ -25,7 +25,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
     });
 });
 
-/* ---------- 本地图片预览（单图） ---------- */
+/* ---------- 本地图片预览 ---------- */
 function previewFile(input, containerId) {
     var c = document.getElementById(containerId);
     var imgOld = c.querySelector('.preview-img');
@@ -39,81 +39,13 @@ function previewFile(input, containerId) {
     }
 }
 
-/* ---------- 多图预览（图生视频专用） ---------- */
-var imgVidFiles = [];
-
-function previewMultiFiles(input, containerId) {
-    var c = document.getElementById(containerId);
-    var existing = c.querySelector('.preview-multi');
-    if (existing) existing.remove();
-
-    imgVidFiles = [];
-    var files = input.files;
-    if (!files || files.length === 0) {
-        c.querySelector('span').textContent = '点击或拖拽上传图片（最多5张）';
-        return;
-    }
-
-    var count = Math.min(files.length, 5);
-    for (var i = 0; i < count; i++) {
-        imgVidFiles.push(files[i]);
-    }
-
-    c.querySelector('span').textContent = '已选择 ' + imgVidFiles.length + ' 张图片（点击可重新选择）';
-
-    var grid = document.createElement('div');
-    grid.className = 'preview-multi';
-    for (var j = 0; j < imgVidFiles.length; j++) {
-        var wrap = document.createElement('div');
-        wrap.className = 'preview-multi-item';
-        var img = document.createElement('img');
-        img.src = URL.createObjectURL(imgVidFiles[j]);
-        wrap.appendChild(img);
-        var idx = document.createElement('span');
-        idx.className = 'preview-multi-idx';
-        idx.textContent = (j + 1);
-        wrap.appendChild(idx);
-        grid.appendChild(wrap);
-    }
-    c.appendChild(grid);
-}
-
-/* ---------- 文件转 base64（去掉 data:xxx;base64, 前缀） ---------- */
+/* ---------- 文件转 base64 ---------- */
 function fileToBase64(file) {
     return new Promise(function(resolve, reject) {
         var reader = new FileReader();
-        reader.onload = function(e) {
-            var full = e.target.result;
-            // 去掉 data:image/xxx;base64, 前缀，只保留纯 base64
-            var pure = full.indexOf(',') !== -1 ? full.split(',')[1] : full;
-            resolve(pure);
-        };
+        reader.onload = function(e) { resolve(e.target.result); };
         reader.onerror = reject;
         reader.readAsDataURL(file);
-    });
-}
-
-/* ---------- 多文件批量转 base64 ---------- */
-function filesToBase64(files) {
-    var promises = [];
-    for (var i = 0; i < files.length; i++) {
-        promises.push(fileToBase64(files[i]));
-    }
-    return Promise.all(promises);
-}
-
-/* ---------- 通用 fetch 包装：带详细错误信息 ---------- */
-function fetchJson(url, options) {
-    return fetch(url, options).then(function(res) {
-        return res.text().then(function(text) {
-            var data;
-            try { data = JSON.parse(text); } catch(e) { data = null; }
-            if (!res.ok) {
-                var msg = (data && data.error && data.error.message) || text.substring(0, 300) || ('HTTP ' + res.status);
-                throw new Error(msg);
-            }
-            return data || {};
-        });
     });
 }
 
@@ -142,7 +74,7 @@ function sendChat() {
     msgsEl.innerHTML += '<div class="chat-msg assistant" id="' + loadId + '"><div class="bubble"><span class="status">思考中...</span></div></div>';
     msgsEl.scrollTop = msgsEl.scrollHeight;
 
-    fetchJson(BASE + '/v1/chat/completions', {
+    fetch(BASE + '/v1/chat/completions', {
         method: "POST",
         headers: {
             "Authorization": "Bearer " + key,
@@ -154,7 +86,7 @@ function sendChat() {
             temperature: 0.7,
             max_tokens: 2048
         })
-    }).then(function(data) {
+    }).then(function(res) { return res.json(); }).then(function(data) {
         var loadEl = document.getElementById(loadId);
         if (data.choices && data.choices[0]) {
             var reply = data.choices[0].message.content;
@@ -184,7 +116,7 @@ function genTxtImg() {
     }
     resBox.innerHTML = '<span class="status">图片生成中，请稍候...</span>';
 
-    fetchJson(BASE + '/v1/images/generations', {
+    fetch(BASE + '/v1/images/generations', {
         method: "POST",
         headers: {
             "Authorization": "Bearer " + key,
@@ -197,14 +129,14 @@ function genTxtImg() {
             quality: quality,
             extra_body: { response_format: "url" }
         })
-    }).then(function(data) {
+    }).then(function(res) { return res.json(); }).then(function(data) {
         if (data.data && data.data[0] && data.data[0].url) {
             resBox.innerHTML = '<img src="' + data.data[0].url + '" alt="生成图片">';
         } else {
             resBox.innerHTML = '<span class="error">生成失败：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
         }
     }).catch(function(e) {
-        resBox.innerHTML = '<span class="error">生成失败：' + escHtml(e.message) + '</span>';
+        resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>';
     });
 }
 
@@ -228,7 +160,7 @@ function genImgImg() {
     resBox.innerHTML = '<span class="status">图生图处理中...</span>';
 
     fileToBase64(fileInput.files[0]).then(function(base64) {
-        return fetchJson(BASE + '/v1/images/generations', {
+        return fetch(BASE + '/v1/images/generations', {
             method: "POST",
             headers: {
                 "Authorization": "Bearer " + key,
@@ -242,14 +174,14 @@ function genImgImg() {
                 extra_body: { image: [base64], response_format: "url" }
             })
         });
-    }).then(function(data) {
+    }).then(function(res) { return res.json(); }).then(function(data) {
         if (data.data && data.data[0] && data.data[0].url) {
             resBox.innerHTML = '<img src="' + data.data[0].url + '" alt="图生图结果">';
         } else {
             resBox.innerHTML = '<span class="error">生成失败：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
         }
     }).catch(function(e) {
-        resBox.innerHTML = '<span class="error">生成失败：' + escHtml(e.message) + '</span>';
+        resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>';
     });
 }
 
@@ -268,7 +200,7 @@ function genTxtVideo() {
     }
     resBox.innerHTML = '<span class="status">提交视频生成任务...</span>';
 
-    fetchJson(BASE + '/v1/videos', {
+    fetch(BASE + '/v1/videos', {
         method: "POST",
         headers: {
             "Authorization": "Bearer " + key,
@@ -282,7 +214,7 @@ function genTxtVideo() {
             duration: duration,
             frame_rate: 24
         })
-    }).then(function(data) {
+    }).then(function(res) { return res.json(); }).then(function(data) {
         var taskId = data.video_id || data.id || data.task_id;
         if (taskId) {
             pollVideoTask(key, taskId, resBox);
@@ -290,61 +222,49 @@ function genTxtVideo() {
             resBox.innerHTML = '<span class="error">提交失败：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
         }
     }).catch(function(e) {
-        resBox.innerHTML = '<span class="error">提交失败：' + escHtml(e.message) + '</span>';
+        resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>';
     });
 }
 
-/* ========== 图生视频（支持多图 + 关键帧模式） ========== */
+/* ========== 图生视频（单图） ========== */
 function genImgVideo() {
     var key      = document.getElementById('apiKey').value.trim();
     var prompt   = document.getElementById('imgVidPrompt').value.trim();
     var ratio    = document.getElementById('imgVidRatio').value;
     var frames   = Number(document.getElementById('imgVidFrames').value);
-    var duration = Number(document.getElementById('imgVidDuration').value);
-    var mode     = document.getElementById('imgVidMode').value;
+    var duration = Number(document.getElementById('imgVidDuration').value;
+    var fileInput = document.getElementById('vidImgFile');
     var resBox   = document.getElementById('imgVidResult');
 
     if (!key) {
         resBox.innerHTML = '<span class="error">请先填写 API Key</span>';
         return;
     }
-    if (imgVidFiles.length === 0) {
-        resBox.innerHTML = '<span class="error">请先上传至少一张图片</span>';
+    if (!fileInput.files[0]) {
+        resBox.innerHTML = '<span class="error">请先上传一张图片</span>';
         return;
     }
-    if (imgVidFiles.length > 5) {
-        resBox.innerHTML = '<span class="error">最多支持5张图片，当前已选 ' + imgVidFiles.length + ' 张</span>';
-        return;
-    }
+    resBox.innerHTML = '<span class="status">图片上传中...</span>';
 
-    resBox.innerHTML = '<span class="status">上传图片并提交任务 (' + imgVidFiles.length + '张图)...</span>';
-
-    filesToBase64(imgVidFiles).then(function(base64Arr) {
-        var imageVal = base64Arr.length === 1 ? base64Arr[0] : base64Arr;
-        var body = {
-            model: "agnes-video-v2.0",
-            prompt: prompt || "让这些图片动起来",
-            ratio: ratio,
-            num_frames: frames,
-            duration: duration,
-            frame_rate: 24,
-            image: imageVal
-        };
-        if (imgVidFiles.length >= 2 && mode === 'keyframes') {
-            body.mode = 'keyframes';
-        }
-        console.log('[img2vid] request body keys:', Object.keys(body));
-        console.log('[img2vid] image count:', imgVidFiles.length, 'mode:', mode);
-
-        return fetchJson(BASE + '/v1/videos', {
+    fileToBase64(fileInput.files[0]).then(function(base64) {
+        resBox.innerHTML = '<span class="status">提交视频生成任务...</span>';
+        return fetch(BASE + '/v1/videos', {
             method: "POST",
             headers: {
                 "Authorization": "Bearer " + key,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify({
+                model: "agnes-video-v2.0",
+                prompt: prompt || "让这张图片动起来",
+                ratio: ratio,
+                num_frames: frames,
+                duration: duration,
+                frame_rate: 24,
+                image: base64
+            })
         });
-    }).then(function(data) {
+    }).then(function(res) { return res.json(); }).then(function(data) {
         var taskId = data.video_id || data.id || data.task_id;
         if (taskId) {
             pollVideoTask(key, taskId, resBox);
@@ -362,9 +282,9 @@ function pollVideoTask(key, videoId, resBox, attempt) {
     var waitSec = attempt * 5;
     resBox.innerHTML = '<span class="status">视频渲染中... 已等待 ' + waitSec + ' 秒</span>';
 
-    fetchJson(BASE + '/agnesapi?video_id=' + videoId, {
+    fetch(BASE + '/agnesapi?video_id=' + videoId, {
         headers: { "Authorization": "Bearer " + key }
-    }).then(function(data) {
+    }).then(function(res) { return res.json(); }).then(function(data) {
         if (data.status === 'completed' || data.status === 'SUCCEEDED') {
             var url = data.video_url || data.url || (data.output && data.output.video_url) || (data.data && data.data[0] && data.data[0].url);
             if (url) {
