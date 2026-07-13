@@ -7,6 +7,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Agnes AI 工具</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         :root {
@@ -230,7 +232,36 @@
         }
         .footer { text-align: center; color: var(--text2); font-size: 11px; margin-top: 24px; padding-bottom: 20px; }
 
-        /* ===== 教程弹窗 ===== */
+        /* 参数选择栏样式 */
+        .param-row {
+            display: flex;
+            gap: 12px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .param-item {
+            flex: 1;
+            min-width: 120px;
+        }
+        .param-item label {
+            display: block;
+            font-size: 13px;
+            color: var(--text2);
+            margin-bottom: 4px;
+        }
+        .param-item select {
+            width: 100%;
+            background: #0d1020;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
+        .param-item select:focus { border-color: var(--accent); }
+
+        /* 教程弹窗 */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -372,13 +403,36 @@
     </div>
 </div>
 
+<!-- 文生图 比例+清晰度 -->
 <div class="panel" id="panel-txt2img">
     <h3>文字生成图片</h3>
     <textarea id="imgPrompt" rows="3" placeholder="描述你想生成的图片，例如：一只白色猫咪坐在窗台上，窗外是星空，水彩风格"></textarea>
+    <div class="param-row">
+        <div class="param-item">
+            <label>画面比例</label>
+            <select id="imgRatio">
+                <option value="1:1">1:1 正方形</option>
+                <option value="4:3">4:3</option>
+                <option value="3:4">3:4</option>
+                <option value="16:9">16:9 宽屏</option>
+                <option value="9:16" selected>9:16 竖屏</option>
+            </select>
+        </div>
+        <div class="param-item">
+            <label>清晰度</label>
+            <select id="imgQuality">
+                <option value="low">低清</option>
+                <option value="mid">中等</option>
+                <option value="high" selected>高清</option>
+                <option value="ultra">超高清</option>
+            </select>
+        </div>
+    </div>
     <button class="gen-btn" onclick="genTxtImg()">生成图片</button>
     <div class="result-box" id="imgResult"></div>
 </div>
 
+<!-- 图生图 比例+清晰度 -->
 <div class="panel" id="panel-img2img">
     <h3>上传图片并编辑</h3>
     <div class="file-upload" id="img2imgUpload">
@@ -386,17 +440,70 @@
         <input type="file" id="imgFile" accept="image/*" onchange="previewFile(this,'img2imgUpload')">
     </div>
     <textarea id="img2imgPrompt" rows="2" placeholder="描述你想如何修改这张图片"></textarea>
+    <div class="param-row">
+        <div class="param-item">
+            <label>画面比例</label>
+            <select id="img2imgRatio">
+                <option value="1:1">1:1 正方形</option>
+                <option value="4:3">4:3</option>
+                <option value="3:4">3:4</option>
+                <option value="16:9">16:9 宽屏</option>
+                <option value="9:16" selected>9:16 竖屏</option>
+            </select>
+        </div>
+        <div class="param-item">
+            <label>清晰度</label>
+            <select id="img2imgQuality">
+                <option value="low">低清</option>
+                <option value="mid">中等</option>
+                <option value="high" selected>高清</option>
+                <option value="ultra">超高清</option>
+            </select>
+        </div>
+    </div>
     <button class="gen-btn" onclick="genImgImg()">生成改造图片</button>
     <div class="result-box" id="img2imgResult"></div>
 </div>
 
+<!-- 文生视频 比例/合规帧数/最长10秒 -->
 <div class="panel" id="panel-txt2vid">
     <h3>文字生成视频</h3>
     <textarea id="vidPrompt" rows="3" placeholder="描述你想生成的视频画面，例如：一只金毛犬在海边奔跑，夕阳余晖，慢动作"></textarea>
+    <div class="param-row">
+        <div class="param-item">
+            <label>画面比例</label>
+            <select id="vidRatio">
+                <option value="16:9" selected>16:9 宽屏</option>
+                <option value="9:16">9:16 竖屏</option>
+                <option value="1:1">1:1 正方形</option>
+            </select>
+        </div>
+        <div class="param-item">
+            <label>总帧数</label>
+            <select id="vidFrames">
+                <option value="49">49帧(约2秒)</option>
+                <option value="73">73帧(约3秒)</option>
+                <option value="121" selected>121帧(约5秒)</option>
+                <option value="177">177帧(约7.4秒)</option>
+                <option value="241">241帧(约10秒)</option>
+            </select>
+        </div>
+        <div class="param-item">
+            <label>时长(秒)</label>
+            <select id="vidDuration">
+                <option value="2">2秒</option>
+                <option value="4">4秒</option>
+                <option value="5" selected>5秒</option>
+                <option value="8">8秒</option>
+                <option value="10">10秒</option>
+            </select>
+        </div>
+    </div>
     <button class="gen-btn" onclick="genTxtVideo()">生成视频</button>
     <div class="result-box" id="vidResult"></div>
 </div>
 
+<!-- 图生视频 比例/合规帧数/最长10秒 -->
 <div class="panel" id="panel-img2vid">
     <h3>让图片动起来</h3>
     <div class="file-upload" id="img2vidUpload">
@@ -404,13 +511,43 @@
         <input type="file" id="vidImgFile" accept="image/*" onchange="previewFile(this,'img2vidUpload')">
     </div>
     <textarea id="imgVidPrompt" rows="2" placeholder="描述你希望图片如何动起来（可选）"></textarea>
+    <div class="param-row">
+        <div class="param-item">
+            <label>画面比例</label>
+            <select id="imgVidRatio">
+                <option value="16:9" selected>16:9 宽屏</option>
+                <option value="9:16">9:16 竖屏</option>
+                <option value="1:1">1:1 正方形</option>
+            </select>
+        </div>
+        <div class="param-item">
+            <label>总帧数</label>
+            <select id="imgVidFrames">
+                <option value="49">49帧(约2秒)</option>
+                <option value="73">73帧(约3秒)</option>
+                <option value="121" selected>121帧(约5秒)</option>
+                <option value="177">177帧(约7.4秒)</option>
+                <option value="241">241帧(约10秒)</option>
+            </select>
+        </div>
+        <div class="param-item">
+            <label>时长(秒)</label>
+            <select id="imgVidDuration">
+                <option value="2">2秒</option>
+                <option value="4">4秒</option>
+                <option value="5" selected>5秒</option>
+                <option value="8">8秒</option>
+                <option value="10">10秒</option>
+            </select>
+        </div>
+    </div>
     <button class="gen-btn" onclick="genImgVideo()">图片转视频</button>
     <div class="result-box" id="imgVidResult"></div>
 </div>
 
 <p class="footer">Powered by Agnes AI · Sapiens AI</p>
 
-<!-- ===== 教程弹窗 ===== -->
+<!-- 教程弹窗 -->
 <div class="modal-overlay" id="tutorialModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -469,10 +606,10 @@
             <p>API Key 只需填写一次，之后每次打开工具会自动保存（如果你的浏览器支持）。现在你可以：</p>
             <ul>
                 <li>💬 <strong>对话</strong> — 跟 AI 聊天、问问题</li>
-                <li>🖼️ <strong>文生图</strong> — 输入文字描述，生成图片</li>
-                <li>🎨 <strong>图生图</strong> — 上传图片 + 描述，AI 帮你改造</li>
-                <li>🎬 <strong>文生视频</strong> — 输入描述，生成约 5 秒视频</li>
-                <li>📹 <strong>图生视频</strong> — 上传一张照片，让 AI 让它动起来</li>
+                <li>🖼️ <strong>文生图</strong> — 输入文字描述，自定义比例、清晰度生成图片</li>
+                <li>🎨 <strong>图生图</strong> — 上传图片 + 描述，自定义比例清晰度改造</li>
+                <li>🎬 <strong>文生视频</strong> — 自定义比例、帧数、时长最高10秒生成短视频</li>
+                <li>📹 <strong>图生视频</strong> — 上传照片，自定义视频参数最长10秒动起来</li>
             </ul>
             <span class="link-btn" onclick="closeTutorial()" style="margin-top:14px;cursor:pointer;">← 返回工具</span>
         </div>
@@ -492,7 +629,7 @@
 <script>
 var BASE = "https://apihub.agnes-ai.com";
 
-// ===== 教程弹窗 =====
+// 弹窗控制
 function openTutorial() {
     document.getElementById('tutorialModal').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -502,23 +639,23 @@ function closeTutorial() {
     document.body.style.overflow = '';
 }
 
-// ===== Tab 切换 =====
+// Tab切换
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-        document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
     });
 });
 
-// ===== 文件预览 =====
+// 本地图片预览
 function previewFile(input, containerId) {
-    var c = document.getElementById(containerId);
-    var existing = c.querySelector('.preview-img');
-    if (existing) existing.remove();
-    if (input.files[0]) {
-        var img = document.createElement('img');
+    const c = document.getElementById(containerId);
+    let imgOld = c.querySelector('.preview-img');
+    if(imgOld) imgOld.remove();
+    if(input.files[0]) {
+        let img = document.createElement('img');
         img.className = 'preview-img';
         img.src = URL.createObjectURL(input.files[0]);
         c.appendChild(img);
@@ -526,181 +663,279 @@ function previewFile(input, containerId) {
     }
 }
 
-// ===== 文件转 base64 =====
+// 文件转base64
 function fileToBase64(file) {
-    return new Promise(function(resolve, reject) {
-        var reader = new FileReader();
-        reader.onload = function() { resolve(reader.result); };
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
 }
 
+// HTML转义防XSS
 function escHtml(s) {
-    var d = document.createElement('div');
-    d.textContent = s;
-    return d.innerHTML;
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
 }
 
-// ===== 聊天对话 =====
-var chatHistory = [];
+// 对话功能
+let chatHistory = [];
 async function sendChat() {
-    var key = document.getElementById('apiKey').value.trim();
-    var input = document.getElementById('chatInput');
-    var text = input.value.trim();
-    if (!key || !text) return;
+    const key = document.getElementById('apiKey').value.trim();
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if(!key || !text) return;
 
-    var msgsEl = document.getElementById('chatMsgs');
-    msgsEl.innerHTML += '<div class="chat-msg user"><div class="bubble">' + escHtml(text) + '</div></div>';
-    chatHistory.push({ role: "user", content: text });
+    const msgsEl = document.getElementById('chatMsgs');
+    msgsEl.innerHTML += `<div class="chat-msg user"><div class="bubble">${escHtml(text)}</div></div>`;
+    chatHistory.push({role:"user", content:text});
     input.value = '';
 
-    var loadId = 'load-' + Date.now();
-    msgsEl.innerHTML += '<div class="chat-msg assistant" id="' + loadId + '"><div class="bubble"><span class="status">思考中...</span></div></div>';
+    const loadId = 'load-' + Date.now();
+    msgsEl.innerHTML += `<div class="chat-msg assistant" id="${loadId}"><div class="bubble"><span class="status">思考中...</span></div></div>`;
     msgsEl.scrollTop = msgsEl.scrollHeight;
 
     try {
-        var res = await fetch(BASE + '/v1/chat/completions', {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
+        const res = await fetch(`${BASE}/v1/chat/completions`, {
+            method:"POST",
+            headers:{
+                "Authorization":"Bearer " + key,
+                "Content-Type":"application/json"
+            },
             body: JSON.stringify({
-                model: "agnes-2.0-flash",
-                messages: [{ role: "system", content: "你是 Agnes AI 助手，友好、专业、简洁地回答用户问题。" }].concat(chatHistory),
-                temperature: 0.7,
-                max_tokens: 2048
+                model:"agnes-2.0-flash",
+                messages:[{role:"system", content:"你是 Agnes AI 助手，友好、专业、简洁地回答用户问题。"}].concat(chatHistory),
+                temperature:0.7,
+                max_tokens:2048
             })
         });
-        var data = await res.json();
-        var loadEl = document.getElementById(loadId);
-        if (data.choices && data.choices[0]) {
-            var reply = data.choices[0].message.content;
-            chatHistory.push({ role: "assistant", content: reply });
+        const data = await res.json();
+        const loadEl = document.getElementById(loadId);
+        if(data.choices && data.choices[0]) {
+            const reply = data.choices[0].message.content;
+            chatHistory.push({role:"assistant", content:reply});
             loadEl.querySelector('.bubble').innerHTML = escHtml(reply);
         } else {
-            loadEl.querySelector('.bubble').innerHTML = '<span class="error">出错：' + escHtml(data.error && data.error.message ? data.error.message : JSON.stringify(data)) + '</span>';
+            loadEl.querySelector('.bubble').innerHTML = `<span class="error">出错：${escHtml(data.error?.message || JSON.stringify(data))}</span>`;
         }
-    } catch (e) {
-        document.getElementById(loadId).querySelector('.bubble').innerHTML = '<span class="error">网络错误：' + escHtml(e.message) + '</span>';
+    } catch(e) {
+        document.getElementById(loadId).querySelector('.bubble').innerHTML = `<span class="error">网络错误：${escHtml(e.message)}</span>`;
     }
     msgsEl.scrollTop = msgsEl.scrollHeight;
 }
 
-// ===== 文生图 =====
+// 文生图
 async function genTxtImg() {
-    var key = document.getElementById('apiKey').value.trim();
-    var prompt = document.getElementById('imgPrompt').value.trim();
-    var resBox = document.getElementById('imgResult');
-    if (!key || !prompt) { resBox.innerHTML = '<span class="error">请填写 API Key 和描述词</span>'; return; }
+    const key = document.getElementById('apiKey').value.trim();
+    const prompt = document.getElementById('imgPrompt').value.trim();
+    const ratio = document.getElementById('imgRatio').value;
+    const quality = document.getElementById('imgQuality').value;
+    const resBox = document.getElementById('imgResult');
+    if(!key || !prompt) {
+        resBox.innerHTML = '<span class="error">请填写 API Key 和描述词</span>';
+        return;
+    }
     resBox.innerHTML = '<span class="status">图片生成中，请稍候...</span>';
     try {
-        var res = await fetch(BASE + '/v1/images/generations', {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "agnes-image-2.0-flash", prompt: prompt, size: "1024x1024", extra_body: { response_format: "url" } })
+        const res = await fetch(`${BASE}/v1/images/generations`, {
+            method:"POST",
+            headers:{
+                "Authorization":"Bearer " + key,
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                model:"agnes-image-2.0-flash",
+                prompt,
+                ratio,
+                quality,
+                extra_body:{response_format:"url"}
+            })
         });
-        var data = await res.json();
-        if (data.data && data.data[0] && data.data[0].url) {
-            resBox.innerHTML = '<img src="' + data.data[0].url + '" alt="生成图片">';
+        const data = await res.json();
+        if(data.data && data.data[0]?.url) {
+            resBox.innerHTML = `<img src="${data.data[0].url}" alt="生成图片">`;
         } else {
-            resBox.innerHTML = '<span class="error">生成失败：' + escHtml(data.error && data.error.message ? data.error.message : JSON.stringify(data)) + '</span>';
+            resBox.innerHTML = `<span class="error">生成失败：${escHtml(data.error?.message || JSON.stringify(data))}</span>`;
         }
-    } catch (e) { resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>'; }
-}
-
-// ===== 图生图 =====
-async function genImgImg() {
-    var key = document.getElementById('apiKey').value.trim();
-    var prompt = document.getElementById('img2imgPrompt').value.trim();
-    var fileInput = document.getElementById('imgFile');
-    var resBox = document.getElementById('img2imgResult');
-    if (!key) { resBox.innerHTML = '<span class="error">请先填写 API Key</span>'; return; }
-    if (!fileInput.files[0]) { resBox.innerHTML = '<span class="error">请先上传一张参考图片</span>'; return; }
-    resBox.innerHTML = '<span class="status">图生图处理中...</span>';
-    try {
-        var base64 = await fileToBase64(fileInput.files[0]);
-        var res = await fetch(BASE + '/v1/images/generations', {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "agnes-image-2.0-flash", prompt: prompt || "编辑这张图片", size: "1024x1024", extra_body: { image: [base64], response_format: "url" } })
-        });
-        var data = await res.json();
-        if (data.data && data.data[0] && data.data[0].url) {
-            resBox.innerHTML = '<img src="' + data.data[0].url + '" alt="图生图结果">';
-        } else {
-            resBox.innerHTML = '<span class="error">生成失败：' + escHtml(data.error && data.error.message ? data.error.message : JSON.stringify(data)) + '</span>';
-        }
-    } catch (e) { resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>'; }
-}
-
-// ===== 文生视频 =====
-async function genTxtVideo() {
-    var key = document.getElementById('apiKey').value.trim();
-    var prompt = document.getElementById('vidPrompt').value.trim();
-    var resBox = document.getElementById('vidResult');
-    if (!key || !prompt) { resBox.innerHTML = '<span class="error">请填写 API Key 和视频描述</span>'; return; }
-    resBox.innerHTML = '<span class="status">提交视频生成任务...</span>';
-    try {
-        var res = await fetch(BASE + '/v1/videos', {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "agnes-video-v2.0", prompt: prompt, height: 768, width: 1152, num_frames: 121, frame_rate: 24 })
-        });
-        var data = await res.json();
-        if (data.video_id || data.id || data.task_id) {
-            pollVideoTask(key, data.video_id || data.id || data.task_id, resBox);
-        } else {
-            resBox.innerHTML = '<span class="error">提交失败：' + escHtml(data.error && data.error.message ? data.error.message : JSON.stringify(data)) + '</span>';
-        }
-    } catch (e) { resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>'; }
-}
-
-// ===== 图生视频 =====
-async function genImgVideo() {
-    var key = document.getElementById('apiKey').value.trim();
-    var prompt = document.getElementById('imgVidPrompt').value.trim();
-    var fileInput = document.getElementById('vidImgFile');
-    var resBox = document.getElementById('imgVidResult');
-    if (!key) { resBox.innerHTML = '<span class="error">请先填写 API Key</span>'; return; }
-    if (!fileInput.files[0]) { resBox.innerHTML = '<span class="error">请先上传一张图片</span>'; return; }
-    resBox.innerHTML = '<span class="status">提交图生视频任务...</span>';
-    try {
-        var base64 = await fileToBase64(fileInput.files[0]);
-        var res = await fetch(BASE + '/v1/videos', {
-            method: "POST",
-            headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "agnes-video-v2.0", prompt: prompt || "让这张图片动起来", image: base64, num_frames: 121, frame_rate: 24 })
-        });
-        var data = await res.json();
-        if (data.video_id || data.id || data.task_id) {
-            pollVideoTask(key, data.video_id || data.id || data.task_id, resBox);
-        } else {
-            resBox.innerHTML = '<span class="error">提交失败：' + escHtml(data.error && data.error.message ? data.error.message : JSON.stringify(data)) + '</span>';
-        }
-    } catch (e) { resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>'; }
-}
-
-// ===== 视频轮询 =====
-async function pollVideoTask(key, videoId, resBox, attempt) {
-    attempt = attempt || 0;
-    var sec = attempt * 5;
-    resBox.innerHTML = '<span class="status">视频渲染中... 已等待 ' + sec + ' 秒</span>';
-    try {
-        var res = await fetch(BASE + '/agnesapi?video_id=' + videoId, { headers: { "Authorization": "Bearer " + key } });
-        var data = await res.json();
-        if (data.status === 'completed' || data.status === 'SUCCEEDED') {
-            var url = data.video_url || data.url || (data.output && data.output.video_url) || (data.data && data.data[0] && data.data[0].url);
-            if (url) { resBox.innerHTML = '<video controls src="' + url + '"></video>'; }
-            else { resBox.innerHTML = '<span class="success">视频已完成</span>\n' + escHtml(JSON.stringify(data, null, 2)); }
-        } else if (data.status === 'failed' || data.status === 'FAILED') {
-            resBox.innerHTML = '<span class="error">视频生成失败：' + escHtml(data.error && data.error.message ? data.error.message : (data.message || '未知错误')) + '</span>';
-        } else {
-            setTimeout(function() { pollVideoTask(key, videoId, resBox, attempt + 1); }, 5000);
-        }
-    } catch (e) {
-        if (attempt < 120) { setTimeout(function() { pollVideoTask(key, videoId, resBox, attempt + 1); }, 5000); }
-        else { resBox.innerHTML = '<span class="error">轮询超时</span>'; }
+    } catch(e) {
+        resBox.innerHTML = `<span class="error">请求失败：${escHtml(e.message)}</span>`;
     }
 }
+
+// 图生图
+async function genImgImg() {
+    const key = document.getElementById('apiKey').value.trim();
+    const prompt = document.getElementById('img2imgPrompt').value.trim();
+    const ratio = document.getElementById('img2imgRatio').value;
+    const quality = document.getElementById('img2imgQuality').value;
+    const fileInput = document.getElementById('imgFile');
+    const resBox = document.getElementById('img2imgResult');
+    if(!key) {
+        resBox.innerHTML = '<span class="error">请先填写 API Key</span>';
+        return;
+    }
+    if(!fileInput.files[0]) {
+        resBox.innerHTML = '<span class="error">请先上传一张参考图片</span>';
+        return;
+    }
+    resBox.innerHTML = '<span class="status">图生图处理中...</span>';
+    try {
+        const base64 = await fileToBase64(fileInput.files[0]);
+        const res = await fetch(`${BASE}/v1/images/generations`, {
+            method:"POST",
+            headers:{
+                "Authorization":"Bearer " + key,
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                model:"agnes-image-2.0-flash",
+                prompt: prompt || "编辑这张图片",
+                ratio,
+                quality,
+                extra_body:{image:[base64], response_format:"url"}
+            })
+        });
+        const data = await res.json();
+        if(data.data && data.data[0]?.url) {
+            resBox.innerHTML = `<img src="${data.data[0].url}" alt="图生图结果">`;
+        } else {
+            resBox.innerHTML = `<span class="error">生成失败：${escHtml(data.error?.message || JSON.stringify(data))}</span>`;
+        }
+    } catch(e) {
+        resBox.innerHTML = `<span class="error">请求失败：${escHtml(e.message)}</span>`;
+    }
+}
+
+// 文生视频
+async function genTxtVideo() {
+    const key = document.getElementById('apiKey').value.trim();
+    const prompt = document.getElementById('vidPrompt').value.trim();
+    const ratio = document.getElementById('vidRatio').value;
+    const frames = Number(document.getElementById('vidFrames').value);
+    const duration = Number(document.getElementById('vidDuration').value);
+    const resBox = document.getElementById('vidResult');
+    if(!key || !prompt) {
+        resBox.innerHTML = '<span class="error">请填写 API Key 和视频描述</span>';
+        return;
+    }
+    resBox.innerHTML = '<span class="status">提交视频生成任务...</span>';
+    try {
+        const res = await fetch(`${BASE}/v1/videos`, {
+            method:"POST",
+            headers:{
+                "Authorization":"Bearer " + key,
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                model:"agnes-video-v2.0",
+                prompt,
+                ratio,
+                num_frames:frames,
+                duration,
+                frame_rate:24
+            })
+        });
+        const data = await res.json();
+        const taskId = data.video_id || data.id || data.task_id;
+        if(taskId) {
+            pollVideoTask(key, taskId, resBox);
+        } else {
+            resBox.innerHTML = `<span class="error">提交失败：${escHtml(data.error?.message || JSON.stringify(data))}</span>`;
+        }
+    } catch(e) {
+        resBox.innerHTML = `<span class="error">请求失败：${escHtml(e.message)}</span>`;
+    }
+}
+
+// 图生视频
+async function genImgVideo() {
+    const key = document.getElementById('apiKey').value.trim();
+    const prompt = document.getElementById('imgVidPrompt').value.trim();
+    const ratio = document.getElementById('imgVidRatio').value;
+    const frames = Number(document.getElementById('imgVidFrames').value);
+    const duration = Number(document.getElementById('imgVidDuration').value);
+    const fileInput = document.getElementById('vidImgFile');
+    const resBox = document.getElementById('imgVidResult');
+    if(!key) {
+        resBox.innerHTML = '<span class="error">请先填写 API Key</span>';
+        return;
+    }
+    if(!fileInput.files[0]) {
+        resBox.innerHTML = '<span class="error">请先上传一张图片</span>';
+        return;
+    }
+    resBox.innerHTML = '<span class="status">提交图生视频任务...</span>';
+    try {
+        const base64 = await fileToBase64(fileInput.files[0]);
+        const res = await fetch(`${BASE}/v1/videos`, {
+            method:"POST",
+            headers:{
+                "Authorization":"Bearer " + key,
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+                model:"agnes-video-v2.0",
+                prompt: prompt || "让这张图片动起来",
+                ratio,
+                num_frames:frames,
+                duration,
+                frame_rate:24,
+                image:base64
+            })
+        });
+        const data = await res.json();
+        const taskId = data.video_id || data.id || data.task_id;
+        if(taskId) {
+            pollVideoTask(key, taskId, resBox);
+        } else {
+            resBox.innerHTML = `<span class="error">提交失败：${escHtml(data.error?.message || JSON.stringify(data))}</span>`;
+        }
+    } catch(e) {
+        resBox.innerHTML = `<span class="error">请求失败：${escHtml(e.message)}</span>`;
+    }
+}
+
+// 视频轮询（适配10秒加长等待）
+async function pollVideoTask(key, videoId, resBox, attempt=0) {
+    const waitSec = attempt * 5;
+    resBox.innerHTML = `<span class="status">视频渲染中... 已等待 ${waitSec} 秒</span>`;
+    try {
+        const res = await fetch(`${BASE}/agnesapi?video_id=${videoId}`, {
+            headers:{"Authorization":"Bearer " + key}
+        });
+        const data = await res.json();
+        if(data.status === 'completed' || data.status === 'SUCCEEDED') {
+            const url = data.video_url || data.url || data.output?.video_url || data.data?.[0]?.url;
+            if(url) {
+                resBox.innerHTML = `<video controls src="${url}"></video>`;
+            } else {
+                resBox.innerHTML = `<span class="success">视频已完成</span>\n${escHtml(JSON.stringify(data,null,2))}`;
+            }
+        } else if(data.status === 'failed' || data.status === 'FAILED') {
+            resBox.innerHTML = `<span class="error">视频生成失败：${escHtml(data.error?.message || data.message || "未知错误")}</span>`;
+        } else {
+            setTimeout(()=>pollVideoTask(key,videoId,resBox,attempt+1),5000);
+        }
+    } catch(e) {
+        if(attempt < 180) {
+            setTimeout(()=>pollVideoTask(key,videoId,resBox,attempt+1),5000);
+        } else {
+            resBox.innerHTML = '<span class="error">轮询超时</span>';
+        }
+    }
+}
+
+// 自动联动：切换时长自动匹配对应合规帧数
+document.getElementById('vidDuration').addEventListener('change', function(){
+    const map = {"2":"49","4":"73","5":"121","8":"177","10":"241"};
+    document.getElementById('vidFrames').value = map[this.value];
+});
+document.getElementById('imgVidDuration').addEventListener('change', function(){
+    const map = {"2":"49","4":"73","5":"121","8":"177","10":"241"};
+    document.getElementById('imgVidFrames').value = map[this.value];
+});
 </script>
 </body>
 </html>
