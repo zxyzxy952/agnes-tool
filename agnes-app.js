@@ -25,7 +25,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
     });
 });
 
-/* ---------- 本地图片预览 ---------- */
+/* ---------- 本地图片预览（单图） ---------- */
 function previewFile(input, containerId) {
     var c = document.getElementById(containerId);
     var imgOld = c.querySelector('.preview-img');
@@ -39,6 +39,48 @@ function previewFile(input, containerId) {
     }
 }
 
+/* ---------- 多图预览（图生视频专用） ---------- */
+var imgVidFiles = []; // 存储已选文件
+
+function previewMultiFiles(input, containerId) {
+    var c = document.getElementById(containerId);
+    var existing = c.querySelector('.preview-multi');
+    if (existing) existing.remove();
+
+    imgVidFiles = [];
+    var files = input.files;
+    if (!files || files.length === 0) {
+        c.querySelector('span').textContent = '点击或拖拽上传图片（最多5张）';
+        return;
+    }
+
+    // 最多取5张
+    var count = Math.min(files.length, 5);
+    for (var i = 0; i < count; i++) {
+        imgVidFiles.push(files[i]);
+    }
+
+    // 更新文字
+    c.querySelector('span').textContent = '已选择 ' + imgVidFiles.length + ' 张图片（点击可重新选择）';
+
+    // 生成预览网格
+    var grid = document.createElement('div');
+    grid.className = 'preview-multi';
+    for (var j = 0; j < imgVidFiles.length; j++) {
+        var wrap = document.createElement('div');
+        wrap.className = 'preview-multi-item';
+        var img = document.createElement('img');
+        img.src = URL.createObjectURL(imgVidFiles[j]);
+        wrap.appendChild(img);
+        var idx = document.createElement('span');
+        idx.className = 'preview-multi-idx';
+        idx.textContent = (j + 1);
+        wrap.appendChild(idx);
+        grid.appendChild(wrap);
+    }
+    c.appendChild(grid);
+}
+
 /* ---------- 文件转 base64 ---------- */
 function fileToBase64(file) {
     return new Promise(function(resolve, reject) {
@@ -47,6 +89,15 @@ function fileToBase64(file) {
         reader.onerror = reject;
         reader.readAsDataURL(file);
     });
+}
+
+/* ---------- 多文件批量转 base64 ---------- */
+function filesToBase64(files) {
+    var promises = [];
+    for (var i = 0; i < files.length; i++) {
+        promises.push(fileToBase64(files[i]));
+    }
+    return Promise.all(promises);
 }
 
 /* ---------- HTML 转义防 XSS ---------- */
@@ -226,42 +277,53 @@ function genTxtVideo() {
     });
 }
 
-/* ========== 图生视频 ========== */
+/* ========== 图生视频（支持多图 + 关键帧模式） ========== */
 function genImgVideo() {
-    var key       = document.getElementById('apiKey').value.trim();
-    var prompt    = document.getElementById('imgVidPrompt').value.trim();
-    var ratio     = document.getElementById('imgVidRatio').value;
-    var frames    = Number(document.getElementById('imgVidFrames').value);
-    var duration  = Number(document.getElementById('imgVidDuration').value);
-    var fileInput = document.getElementById('vidImgFile');
-    var resBox    = document.getElementById('imgVidResult');
+    var key      = document.getElementById('apiKey').value.trim();
+    var prompt   = document.getElementById('imgVidPrompt').value.trim();
+    var ratio    = document.getElementById('imgVidRatio').value;
+    var frames   = Number(document.getElementById('imgVidFrames').value);
+    var duration = Number(document.getElementById('imgVidDuration').value);
+    var mode     = document.getElementById('imgVidMode').value;
+    var resBox   = document.getElementById('imgVidResult');
 
     if (!key) {
         resBox.innerHTML = '<span class="error">请先填写 API Key</span>';
         return;
     }
-    if (!fileInput.files[0]) {
-        resBox.innerHTML = '<span class="error">请先上传一张图片</span>';
+    if (imgVidFiles.length === 0) {
+        resBox.innerHTML = '<span class="error">请先上传至少一张图片</span>';
         return;
     }
-    resBox.innerHTML = '<span class="status">提交图生视频任务...</span>';
+    if (imgVidFiles.length > 5) {
+        resBox.innerHTML = '<span class="error">最多支持5张图片，当前已选 ' + imgVidFiles.length + ' 张</span>';
+        return;
+    }
 
-    fileToBase64(fileInput.files[0]).then(function(base64) {
+    resBox.innerHTML = '<span class="status">上传图片并提交任务 (' + imgVidFiles.length + '张图)...</span>';
+
+    filesToBase64(imgVidFiles).then(function(base64Arr) {
+        var body = {
+            model: "agnes-video-v2.0",
+            prompt: prompt || "让这些图片动起来",
+            ratio: ratio,
+            num_frames: frames,
+            duration: duration,
+            frame_rate: 24,
+            image: base64Arr
+        };
+        // 多图时加关键帧模式
+        if (imgVidFiles.length >= 2 && mode === 'keyframes') {
+            body.mode = 'keyframes';
+        }
+
         return fetch(BASE + '/v1/videos', {
             method: "POST",
             headers: {
                 "Authorization": "Bearer " + key,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                model: "agnes-video-v2.0",
-                prompt: prompt || "让这张图片动起来",
-                ratio: ratio,
-                num_frames: frames,
-                duration: duration,
-                frame_rate: 24,
-                image: base64
-            })
+            body: JSON.stringify(body)
         });
     }).then(function(res) { return res.json(); }).then(function(data) {
         var taskId = data.video_id || data.id || data.task_id;
