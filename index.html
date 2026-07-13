@@ -11,7 +11,403 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
-    <link rel="stylesheet" href="agnes-style.css">
+    <style>
+        * { margin:0; padding:0; -webkit-box-sizing:border-box; box-sizing:border-box; }
+        :root {
+            --bg: #0a0e1a;
+            --card: #131729;
+            --border: #1e2740;
+            --accent: #4a7cff;
+            --accent2: #7c5cfc;
+            --text: #e0e4f0;
+            --text2: #8891a8;
+            --success: #2dd284;
+            --error: #ff5a6a;
+        }
+        html {
+            background: var(--bg);
+            -webkit-overscroll-behavior: none;
+            overscroll-behavior: none;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            padding: 16px;
+            padding-top: env(safe-area-inset-top, 16px);
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* P3 广色域 */
+        @media (color-gamut: p3) {
+            :root {
+                --bg: #080c1a;
+                --card: #111529;
+                --border: #1c2542;
+                --accent: color(display-p3 0.22 0.44 1.0);
+                --accent2: color(display-p3 0.45 0.32 1.0);
+                --text: color(display-p3 0.88 0.89 0.94);
+                --text2: color(display-p3 0.53 0.57 0.66);
+                --success: color(display-p3 0.18 0.82 0.52);
+                --error: color(display-p3 1.0 0.35 0.42);
+            }
+        }
+
+        /* 顶栏 */
+        .top-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 16px 0 4px;
+        }
+        .top-bar h1 {
+            font-size: 22px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tutorial-btn {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 6px 14px;
+            background: rgba(74,124,255,0.15);
+            border: 1px solid rgba(74,124,255,0.3);
+            border-radius: 16px;
+            color: var(--accent);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tutorial-btn:hover { background: rgba(74,124,255,0.25); }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text2);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .key-bar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .key-bar input {
+            flex: 1;
+            background: #0d1020;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
+        .key-bar input:focus { border-color: var(--accent); }
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text2);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border-color: transparent;
+        }
+        .panel {
+            display: none;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            animation: fadeIn 0.25s;
+        }
+        .panel.active { display: block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+        .panel h3 { font-size: 15px; color: var(--text); margin-bottom: 12px; }
+        textarea {
+            width: 100%;
+            background: #0d1020;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            color: var(--text);
+            font-size: 14px;
+            resize: vertical;
+            outline: none;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        textarea:focus { border-color: var(--accent); }
+        .file-upload {
+            background: #0d1020;
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            color: var(--text2);
+            font-size: 13px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .file-upload:hover { border-color: var(--accent); }
+        .file-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .file-upload .preview-img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 10px; }
+        .gen-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: opacity 0.2s;
+        }
+        .gen-btn:active { opacity: 0.8; }
+        .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .result-box {
+            margin-top: 14px;
+            padding: 14px;
+            background: #0d1020;
+            border-radius: 10px;
+            min-height: 50px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .result-box img, .result-box video { max-width: 100%; border-radius: 8px; margin-top: 8px; }
+        .result-box .status { color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        .result-box .status::before {
+            content: "";
+            width: 16px; height: 16px;
+            border: 2px solid var(--accent);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg) } }
+        .result-box .error { color: var(--error); }
+        .result-box .success { color: var(--success); }
+        .chat-messages { max-height: 400px; overflow-y: auto; padding: 10px 0; }
+        .chat-msg { margin-bottom: 12px; display: flex; gap: 8px; }
+        .chat-msg.user { justify-content: flex-end; }
+        .chat-msg .bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .chat-msg.user .bubble {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-msg.assistant .bubble {
+            background: #1a1f35;
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input-row { display: flex; gap: 8px; margin-top: 12px; }
+        .chat-input-row textarea { flex: 1; min-height: 44px; max-height: 120px; }
+        .chat-input-row .send-btn {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            align-self: flex-end;
+            flex-shrink: 0;
+        }
+        .footer { text-align: center; color: var(--text2); font-size: 11px; margin-top: 24px; padding-bottom: 20px; }
+
+        /* 参数选择栏样式 */
+        .param-row {
+            display: flex;
+            gap: 12px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .param-item {
+            flex: 1;
+            min-width: 120px;
+        }
+        .param-item label {
+            display: block;
+            font-size: 13px;
+            color: var(--text2);
+            margin-bottom: 4px;
+            pointer-events: none;
+        }
+        .param-item select {
+            width: 100%;
+            background: #0d1020;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-size: 16px;
+            outline: none;
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-user-select: auto;
+            user-select: auto;
+            min-height: 44px;
+            -webkit-tap-highlight-color: rgba(74,124,255,0.25);
+            position: relative;
+            z-index: 1;
+            -webkit-appearance: auto;
+            appearance: auto;
+        }
+        .param-item select:focus { border-color: var(--accent); }
+
+        /* 教程弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .modal-overlay.show { display: block; }
+        .modal-content {
+            background: var(--bg);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
+            min-height: 100vh;
+            animation: slideUp 0.3s;
+        }
+        @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:none;opacity:1} }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0 16px;
+        }
+        .close-btn {
+            padding: 6px 14px;
+            background: rgba(74,124,255,0.15);
+            border: 1px solid rgba(74,124,255,0.3);
+            border-radius: 16px;
+            color: var(--accent);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .close-btn:hover { background: rgba(74,124,255,0.25); }
+        .modal-header h2 {
+            font-size: 18px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .intro-card {
+            background: linear-gradient(135deg, rgba(74,124,255,0.12), rgba(124,92,252,0.08));
+            border: 1px solid rgba(74,124,255,0.2);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+        .intro-card p { font-size: 14px; line-height: 1.7; }
+        .intro-card .highlight { color: var(--accent); font-weight: 600; }
+        .step-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .step-card h3 { font-size: 15px; margin-bottom: 8px; }
+        .step-card p, .step-card li { color: var(--text2); font-size: 14px; line-height: 1.7; }
+        .step-card ul { padding-left: 18px; margin-top: 8px; }
+        .step-card li { margin-bottom: 6px; }
+        .link-btn {
+            display: inline-block;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 10px 4px 0 0;
+            transition: opacity 0.2s;
+        }
+        .link-btn:active { opacity: 0.8; }
+        .code-block {
+            background: #0d1020;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+            margin: 10px 0;
+            font-family: "SF Mono", "Fira Code", monospace;
+            font-size: 13px;
+            color: var(--success);
+            overflow-x: auto;
+            word-break: break-all;
+        }
+        .warn-card {
+            background: rgba(255,90,106,0.08);
+            border: 1px solid rgba(255,90,106,0.2);
+            border-radius: 14px;
+            padding: 18px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .warn-card h3 { color: var(--error); font-size: 15px; margin-bottom: 10px; }
+        .warn-card li { color: var(--text2); font-size: 14px; line-height: 1.7; margin-bottom: 6px; }
+        .warn-card ul { padding-left: 18px; }
+    </style>
 </head>
 <body>
 
@@ -33,7 +429,6 @@
     <div class="tab-btn" data-tab="img2vid">📹 图生视频</div>
 </div>
 
-<!-- 对话 -->
 <div class="panel active" id="panel-chat">
     <h3>与 Agnes 对话</h3>
     <div class="chat-messages" id="chatMsgs"></div>
@@ -203,7 +598,7 @@
             <div class="step-num">1</div>
             <h3>打开 Agnes AI 官网并注册账号</h3>
             <p>点击下方按钮打开 Agnes AI 开发者平台：</p>
-            <a class="link-btn" href="https://platform.agnes-ai.com" target="_blank" rel="noopener">打开 platform.agnes-ai.com</a>
+            <a class="link-btn" href="https://platform.agnes-ai.com" target="_blank">打开 platform.agnes-ai.com</a>
             <p style="margin-top:10px;">在页面上点击 <strong>Sign Up</strong>（注册）按钮，使用邮箱注册一个新账号。注册完成后登录。</p>
             <ul>
                 <li>支持 Google 账号快捷登录</li>
@@ -266,6 +661,316 @@
     </div>
 </div>
 
-<script src="agnes-app.js"></script>
+<script>
+var BASE = "https://apihub.agnes-ai.com";
+
+// 弹窗控制
+function openTutorial() {
+    document.getElementById('tutorialModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+function closeTutorial() {
+    document.getElementById('tutorialModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// Tab切换
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+// 本地图片预览
+function previewFile(input, containerId) {
+    var c = document.getElementById(containerId);
+    var imgOld = c.querySelector('.preview-img');
+    if (imgOld) imgOld.remove();
+    if (input.files[0]) {
+        var img = document.createElement('img');
+        img.className = 'preview-img';
+        img.src = URL.createObjectURL(input.files[0]);
+        c.appendChild(img);
+        c.querySelector('span').textContent = '已选择: ' + input.files[0].name;
+    }
+}
+
+// 文件转base64
+function fileToBase64(file) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(e) { resolve(e.target.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// HTML转义防XSS
+function escHtml(s) {
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+}
+
+// 对话功能
+var chatHistory = [];
+function sendChat() {
+    var key   = document.getElementById('apiKey').value.trim();
+    var input = document.getElementById('chatInput');
+    var text  = input.value.trim();
+    if (!key || !text) return;
+
+    var msgsEl = document.getElementById('chatMsgs');
+    msgsEl.innerHTML += '<div class="chat-msg user"><div class="bubble">' + escHtml(text) + '</div></div>';
+    chatHistory.push({ role: "user", content: text });
+    input.value = '';
+
+    var loadId = 'load-' + Date.now();
+    msgsEl.innerHTML += '<div class="chat-msg assistant" id="' + loadId + '"><div class="bubble"><span class="status">思考中...</span></div></div>';
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    fetch(BASE + '/v1/chat/completions', {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + key,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "agnes-2.0-flash",
+            messages: [{ role: "system", content: "你是 Agnes AI 助手，友好、专业、简洁地回答用户问题。" }].concat(chatHistory),
+            temperature: 0.7,
+            max_tokens: 2048
+        })
+    }).then(function(res) { return res.json(); }).then(function(data) {
+        var loadEl = document.getElementById(loadId);
+        if (data.choices && data.choices[0]) {
+            var reply = data.choices[0].message.content;
+            chatHistory.push({ role: "assistant", content: reply });
+            loadEl.querySelector('.bubble').innerHTML = escHtml(reply);
+        } else {
+            loadEl.querySelector('.bubble').innerHTML = '<span class="error">出错：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
+        }
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+    }).catch(function(e) {
+        document.getElementById(loadId).querySelector('.bubble').innerHTML = '<span class="error">网络错误：' + escHtml(e.message) + '</span>';
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+    });
+}
+
+// 文生图
+function genTxtImg() {
+    var key     = document.getElementById('apiKey').value.trim();
+    var prompt  = document.getElementById('imgPrompt').value.trim();
+    var ratio   = document.getElementById('imgRatio').value;
+    var quality = document.getElementById('imgQuality').value;
+    var resBox  = document.getElementById('imgResult');
+    if (!key || !prompt) {
+        resBox.innerHTML = '<span class="error">请填写 API Key 和描述词</span>';
+        return;
+    }
+    resBox.innerHTML = '<span class="status">图片生成中，请稍候...</span>';
+
+    fetch(BASE + '/v1/images/generations', {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + key,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "agnes-image-2.0-flash",
+            prompt: prompt,
+            ratio: ratio,
+            quality: quality,
+            extra_body: { response_format: "url" }
+        })
+    }).then(function(res) { return res.json(); }).then(function(data) {
+        if (data.data && data.data[0] && data.data[0].url) {
+            resBox.innerHTML = '<img src="' + data.data[0].url + '" alt="生成图片">';
+        } else {
+            resBox.innerHTML = '<span class="error">生成失败：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
+        }
+    }).catch(function(e) {
+        resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>';
+    });
+}
+
+// 图生图
+function genImgImg() {
+    var key       = document.getElementById('apiKey').value.trim();
+    var prompt    = document.getElementById('img2imgPrompt').value.trim();
+    var ratio     = document.getElementById('img2imgRatio').value;
+    var quality   = document.getElementById('img2imgQuality').value;
+    var fileInput = document.getElementById('imgFile');
+    var resBox    = document.getElementById('img2imgResult');
+    if (!key) {
+        resBox.innerHTML = '<span class="error">请先填写 API Key</span>';
+        return;
+    }
+    if (!fileInput.files[0]) {
+        resBox.innerHTML = '<span class="error">请先上传一张参考图片</span>';
+        return;
+    }
+    resBox.innerHTML = '<span class="status">图生图处理中...</span>';
+
+    fileToBase64(fileInput.files[0]).then(function(base64) {
+        return fetch(BASE + '/v1/images/generations', {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + key,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "agnes-image-2.0-flash",
+                prompt: prompt || "编辑这张图片",
+                ratio: ratio,
+                quality: quality,
+                extra_body: { image: [base64], response_format: "url" }
+            })
+        });
+    }).then(function(res) { return res.json(); }).then(function(data) {
+        if (data.data && data.data[0] && data.data[0].url) {
+            resBox.innerHTML = '<img src="' + data.data[0].url + '" alt="图生图结果">';
+        } else {
+            resBox.innerHTML = '<span class="error">生成失败：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
+        }
+    }).catch(function(e) {
+        resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>';
+    });
+}
+
+// 文生视频
+function genTxtVideo() {
+    var key      = document.getElementById('apiKey').value.trim();
+    var prompt   = document.getElementById('vidPrompt').value.trim();
+    var ratio    = document.getElementById('vidRatio').value;
+    var frames   = Number(document.getElementById('vidFrames').value);
+    var duration = Number(document.getElementById('vidDuration').value);
+    var resBox   = document.getElementById('vidResult');
+    if (!key || !prompt) {
+        resBox.innerHTML = '<span class="error">请填写 API Key 和视频描述</span>';
+        return;
+    }
+    resBox.innerHTML = '<span class="status">提交视频生成任务...</span>';
+
+    fetch(BASE + '/v1/videos', {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + key,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "agnes-video-v2.0",
+            prompt: prompt,
+            ratio: ratio,
+            num_frames: frames,
+            duration: duration,
+            frame_rate: 24
+        })
+    }).then(function(res) { return res.json(); }).then(function(data) {
+        var taskId = data.video_id || data.id || data.task_id;
+        if (taskId) {
+            pollVideoTask(key, taskId, resBox);
+        } else {
+            resBox.innerHTML = '<span class="error">提交失败：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
+        }
+    }).catch(function(e) {
+        resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>';
+    });
+}
+
+// 图生视频
+function genImgVideo() {
+    var key       = document.getElementById('apiKey').value.trim();
+    var prompt    = document.getElementById('imgVidPrompt').value.trim();
+    var ratio     = document.getElementById('imgVidRatio').value;
+    var frames    = Number(document.getElementById('imgVidFrames').value);
+    var duration  = Number(document.getElementById('imgVidDuration').value);
+    var fileInput = document.getElementById('vidImgFile');
+    var resBox    = document.getElementById('imgVidResult');
+    if (!key) {
+        resBox.innerHTML = '<span class="error">请先填写 API Key</span>';
+        return;
+    }
+    if (!fileInput.files[0]) {
+        resBox.innerHTML = '<span class="error">请先上传一张图片</span>';
+        return;
+    }
+    resBox.innerHTML = '<span class="status">提交图生视频任务...</span>';
+
+    fileToBase64(fileInput.files[0]).then(function(base64) {
+        return fetch(BASE + '/v1/videos', {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + key,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "agnes-video-v2.0",
+                prompt: prompt || "让这张图片动起来",
+                ratio: ratio,
+                num_frames: frames,
+                duration: duration,
+                frame_rate: 24,
+                image: base64
+            })
+        });
+    }).then(function(res) { return res.json(); }).then(function(data) {
+        var taskId = data.video_id || data.id || data.task_id;
+        if (taskId) {
+            pollVideoTask(key, taskId, resBox);
+        } else {
+            resBox.innerHTML = '<span class="error">提交失败：' + escHtml((data.error && data.error.message) || JSON.stringify(data)) + '</span>';
+        }
+    }).catch(function(e) {
+        resBox.innerHTML = '<span class="error">请求失败：' + escHtml(e.message) + '</span>';
+    });
+}
+
+// 视频轮询
+function pollVideoTask(key, videoId, resBox, attempt) {
+    if (typeof attempt === 'undefined') attempt = 0;
+    var waitSec = attempt * 5;
+    resBox.innerHTML = '<span class="status">视频渲染中... 已等待 ' + waitSec + ' 秒</span>';
+
+    fetch(BASE + '/agnesapi?video_id=' + videoId, {
+        headers: { "Authorization": "Bearer " + key }
+    }).then(function(res) { return res.json(); }).then(function(data) {
+        if (data.status === 'completed' || data.status === 'SUCCEEDED') {
+            var url = data.video_url || data.url || (data.output && data.output.video_url) || (data.data && data.data[0] && data.data[0].url);
+            if (url) {
+                resBox.innerHTML = '<video controls src="' + url + '"></video>';
+            } else {
+                resBox.innerHTML = '<span class="success">视频已完成</span>\n' + escHtml(JSON.stringify(data, null, 2));
+            }
+        } else if (data.status === 'failed' || data.status === 'FAILED') {
+            resBox.innerHTML = '<span class="error">视频生成失败：' + escHtml((data.error && data.error.message) || data.message || "未知错误") + '</span>';
+        } else {
+            setTimeout(function() { pollVideoTask(key, videoId, resBox, attempt + 1); }, 5000);
+        }
+    }).catch(function(e) {
+        if (attempt < 180) {
+            setTimeout(function() { pollVideoTask(key, videoId, resBox, attempt + 1); }, 5000);
+        } else {
+            resBox.innerHTML = '<span class="error">轮询超时</span>';
+        }
+    });
+}
+
+// 时长-帧数自动联动
+document.getElementById('vidDuration').addEventListener('change', function() {
+    var map = { "2":"49", "4":"73", "5":"121", "8":"177", "10":"241" };
+    document.getElementById('vidFrames').value = map[this.value];
+});
+document.getElementById('imgVidDuration').addEventListener('change', function() {
+    var map = { "2":"49", "4":"73", "5":"121", "8":"177", "10":"241" };
+    document.getElementById('imgVidFrames').value = map[this.value];
+});
+
+// Safari 触摸反馈修复
+document.addEventListener('touchstart', function() {}, { passive: true });
+</script>
 </body>
 </html>
